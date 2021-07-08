@@ -52,4 +52,12 @@ public class AddressBookServiceTest {
 		assertTrue(result.getId() == 1);
 		Mockito.verify(mockAddressBookRepository).addContactToAddressBook(Mockito.any(AddressBook.class));
 	}
+
+	@Test
+	public void givenAddressBook_whenCalledDeleteByName_shouldDeleteContactInAddressBook() throws AddressBookException {
+		Mockito.when(mockAddressBookRepository.deleteContactByName(Mockito.anyString())).thenReturn(1);
+		int result = mockAddressBookService.deleteContactByName("leo");
+		assertTrue(result == 1);
+		Mockito.verify(mockAddressBookRepository).deleteContactByName(Mockito.anyString());
+	}
 }

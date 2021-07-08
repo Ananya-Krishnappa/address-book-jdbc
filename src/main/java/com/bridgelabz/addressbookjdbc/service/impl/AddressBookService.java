@@ -32,8 +32,24 @@ public class AddressBookService implements IAddressBookService {
 	 * Function to add contacts to address book
 	 */
 	public AddressBook addContactToAddressBook(AddressBook addressBook) throws AddressBookException {
-		AddressBook newAddressBook = addressBookRepository.addContactToAddressBook(addressBook);
-		return newAddressBook;
+		try {
+			AddressBook newAddressBook = addressBookRepository.addContactToAddressBook(addressBook);
+			return newAddressBook;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
 	}
 
+	@Override
+	/**
+	 * Function to delete contact by name
+	 */
+	public int deleteContactByName(String name) throws AddressBookException {
+		try {
+			int result = addressBookRepository.deleteContactByName(name);
+			return result;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
 }

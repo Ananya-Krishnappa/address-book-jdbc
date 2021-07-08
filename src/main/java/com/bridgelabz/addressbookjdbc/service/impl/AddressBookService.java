@@ -7,6 +7,8 @@
  */
 package com.bridgelabz.addressbookjdbc.service.impl;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,14 +42,29 @@ public class AddressBookService implements IAddressBookService {
 		}
 	}
 
-	@Override
 	/**
 	 * Function to delete contact by name
 	 */
+	@Override
 	public int deleteContactByName(String name) throws AddressBookException {
 		try {
 			int result = addressBookRepository.deleteContactByName(name);
 			return result;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Function to add multiple contacts to address book
+	 */
+	@Override
+	public List<AddressBook> addMultipleContactsToAddressBook(List<AddressBook> addressBookList)
+			throws AddressBookException {
+		try {
+			List<AddressBook> newAddressBookList = addressBookRepository
+					.addMultipleContactsToAddressBook(addressBookList);
+			return newAddressBookList;
 		} catch (Exception e) {
 			throw new AddressBookException(e.getMessage());
 		}

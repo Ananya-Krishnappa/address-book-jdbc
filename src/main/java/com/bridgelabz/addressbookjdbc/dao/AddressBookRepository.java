@@ -5,12 +5,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.bridgelabz.addressbookjdbc.dto.AddressBook;
 import com.bridgelabz.addressbookjdbc.exception.AddressBookException;
+import com.bridgelabz.addressbookjdbc.exception.JdbcConnectorException;
 import com.bridgelabz.addressbookjdbc.util.JdbcConnectionFactory;
 
 public class AddressBookRepository {
@@ -79,6 +82,67 @@ public class AddressBookRepository {
 			throw new AddressBookException("SQL State: " + e.getSQLState() + " " + e.getMessage());
 		} catch (Exception e) {
 			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Function to add multiple contacts to address book using batch execution
+	 * 
+	 * @param addressBookList
+	 * @return List<AddressBook>
+	 * @throws AddressBookException
+	 * @throws JdbcConnectorException
+	 * @throws SQLException
+	 */
+	public List<AddressBook> addMultipleContactsToAddressBook(List<AddressBook> addressBookList)
+			throws AddressBookException, JdbcConnectorException, SQLException {
+		Connection connection = JdbcConnectionFactory.getJdbcConnection();
+		try {
+			connection.setAutoCommit(false);
+			PreparedStatement pstmt = connection.prepareStatement(
+					"insert into address_book(first_name,last_name,address,city,state,zip,phone_num,email) "
+							+ "values(?,?,?,?,?,?,?,?)");
+			for (int i = 0; i < addressBookList.size(); i++) {
+				pstmt.setString(1, addressBookList.get(i).getFirstName());
+				pstmt.setString(2, addressBookList.get(i).getLastName());
+				pstmt.setString(3, addressBookList.get(i).getAddress());
+				pstmt.setString(4, addressBookList.get(i).getCity());
+				pstmt.setString(5, addressBookList.get(i).getState());
+				pstmt.setString(6, addressBookList.get(i).getZip());
+				pstmt.setString(7, addressBookList.get(i).getPhoneNumber());
+				pstmt.setString(8, addressBookList.get(i).getEmail());
+				pstmt.addBatch();
+			}
+			try {
+				pstmt.executeBatch();
+			} catch (SQLException e) {
+				LOG.error("Error message: " + e.getMessage());
+				throw new AddressBookException(e.getMessage());
+			}
+			connection.commit();
+			List<AddressBook> newAddressBookList = new ArrayList<AddressBook>();
+			Statement stmt = connection.createStatement();
+			ResultSet rs = null;
+			rs = stmt.executeQuery("SELECT * from address_book");
+			while (rs.next()) {
+				AddressBook addressBook = new AddressBook();
+				addressBook.setId(rs.getInt("id"));
+				addressBook.setAddress(rs.getString("address"));
+				addressBook.setCity(rs.getString("city"));
+				addressBook.setEmail(rs.getString("email"));
+				addressBook.setFirstName(rs.getString("first_name"));
+				addressBook.setLastName(rs.getString("last_name"));
+				addressBook.setPhoneNumber(rs.getString("phone_num"));
+				addressBook.setState(rs.getString("state"));
+				addressBook.setZip(rs.getString("zip"));
+				newAddressBookList.add(addressBook);
+			}
+			return newAddressBookList;
+		} catch (Exception e) {
+			connection.rollback();
+			throw new AddressBookException(e.getMessage());
+		} finally {
+			connection.close();
 		}
 	}
 }

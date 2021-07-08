@@ -1,6 +1,7 @@
 package com.bridgelabz.addressbookjdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
@@ -83,6 +84,18 @@ public class AddressBookServiceTest {
 				.addMultipleContactsToAddressBook(addressBookList);
 		assertEquals(expectedAddressBookList.size(), actualAddressBookList.size());
 		Mockito.verify(mockAddressBookRepository).addMultipleContactsToAddressBook(Mockito.anyList());
+	}
+
+	@Test
+	public void givenAContact_whenCalledAdd_shouldMakeDuplicateNameCheckBeforeAdding() throws AddressBookException {
+		AddressBook addressBook = createAddressBook("goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
+				"Karnataka", "1267");
+		Exception exception = assertThrows(AddressBookException.class, () -> {
+			addressBookService.addContactToAddressBook(addressBook);
+		});
+		String expectedMessage = "Duplicate entry 'Rocky-Hari' for key 'address_book.unique_name'";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage.contains(expectedMessage));
 	}
 
 	/**

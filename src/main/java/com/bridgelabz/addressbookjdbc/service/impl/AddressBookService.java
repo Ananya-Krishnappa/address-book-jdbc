@@ -69,4 +69,17 @@ public class AddressBookService implements IAddressBookService {
 			throw new AddressBookException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Function to search person by city
+	 */
+	@Override
+	public List<AddressBook> searchPersonByCity(String city) throws AddressBookException {
+		try {
+			List<AddressBook> result = addressBookRepository.searchPersonByCity(city);
+			return result;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
 }

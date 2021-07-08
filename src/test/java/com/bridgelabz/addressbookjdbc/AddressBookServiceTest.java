@@ -87,6 +87,18 @@ public class AddressBookServiceTest {
 	}
 
 	@Test
+	public void givenAddressBook_whenSearchByCity_shouldReturnValidResultFromAddressBook() throws AddressBookException {
+		List<AddressBook> result = addressBookService.searchPersonByCity("Banglore");
+		assertTrue(result.size() > 0);
+	}
+
+	@Test
+	public void givenAddressBook_whenSearchByNonExistentCity_shouldReturnEmptyList() throws AddressBookException {
+		List<AddressBook> result = addressBookService.searchPersonByCity("koppa");
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
 	public void givenAContact_whenCalledAdd_shouldMakeDuplicateNameCheckBeforeAdding() throws AddressBookException {
 		AddressBook addressBook = createAddressBook("goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
 				"Karnataka", "1267");

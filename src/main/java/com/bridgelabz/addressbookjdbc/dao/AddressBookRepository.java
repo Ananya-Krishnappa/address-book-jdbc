@@ -120,23 +120,10 @@ public class AddressBookRepository {
 				throw new AddressBookException(e.getMessage());
 			}
 			connection.commit();
-			List<AddressBook> newAddressBookList = new ArrayList<AddressBook>();
 			Statement stmt = connection.createStatement();
 			ResultSet rs = null;
 			rs = stmt.executeQuery("SELECT * from address_book");
-			while (rs.next()) {
-				AddressBook addressBook = new AddressBook();
-				addressBook.setId(rs.getInt("id"));
-				addressBook.setAddress(rs.getString("address"));
-				addressBook.setCity(rs.getString("city"));
-				addressBook.setEmail(rs.getString("email"));
-				addressBook.setFirstName(rs.getString("first_name"));
-				addressBook.setLastName(rs.getString("last_name"));
-				addressBook.setPhoneNumber(rs.getString("phone_num"));
-				addressBook.setState(rs.getString("state"));
-				addressBook.setZip(rs.getString("zip"));
-				newAddressBookList.add(addressBook);
-			}
+			List<AddressBook> newAddressBookList = mapResultSetToAddressBookList(rs);
 			return newAddressBookList;
 		} catch (Exception e) {
 			connection.rollback();
@@ -144,5 +131,46 @@ public class AddressBookRepository {
 		} finally {
 			connection.close();
 		}
+	}
+
+	public List<AddressBook> searchPersonByCity(String city) throws AddressBookException {
+		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
+			String query = "select * from address_book WHERE city = ?";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, city);
+			ResultSet rs = preparedStatement.executeQuery();
+			List<AddressBook> addressBookList = mapResultSetToAddressBookList(rs);
+			return addressBookList;
+		} catch (SQLException e) {
+			LOG.error("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			throw new AddressBookException("SQL State: " + e.getSQLState() + " " + e.getMessage());
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Function to map result set to address book list
+	 * 
+	 * @param rs
+	 * @return List<AddressBook>
+	 * @throws SQLException
+	 */
+	private List<AddressBook> mapResultSetToAddressBookList(ResultSet rs) throws SQLException {
+		List<AddressBook> addressBookList = new ArrayList<AddressBook>();
+		while (rs.next()) {
+			AddressBook addressBook = new AddressBook();
+			addressBook.setId(rs.getInt("id"));
+			addressBook.setAddress(rs.getString("address"));
+			addressBook.setCity(rs.getString("city"));
+			addressBook.setEmail(rs.getString("email"));
+			addressBook.setFirstName(rs.getString("first_name"));
+			addressBook.setLastName(rs.getString("last_name"));
+			addressBook.setPhoneNumber(rs.getString("phone_num"));
+			addressBook.setState(rs.getString("state"));
+			addressBook.setZip(rs.getString("zip"));
+			addressBookList.add(addressBook);
+		}
+		return addressBookList;
 	}
 }

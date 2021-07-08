@@ -12,4 +12,6 @@ public interface IAddressBookService {
 
 	public List<AddressBook> addMultipleContactsToAddressBook(List<AddressBook> addressBookList)
 			throws AddressBookException;
+
+	public List<AddressBook> searchPersonByCity(String city) throws AddressBookException;
 }
